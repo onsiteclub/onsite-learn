@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 const MENUS: Record<string, { label: string; desc: string; href: string }[]> = {
   programs: [
@@ -17,18 +21,50 @@ const MENUS: Record<string, { label: string; desc: string; href: string }[]> = {
   ],
 };
 
+function getInitials(user: User | null) {
+  if (!user) return '';
+  const name = user.user_metadata?.full_name || user.email || '';
+  if (name.includes('@')) return name[0].toUpperCase();
+  return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
 export default function Header() {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    router.refresh();
+    router.push('/');
+  }
 
   return (
     <>
       <header className="site-header">
         <div className="header-inner">
           <Link href="/" className="header-logo">
-            <div className="header-logo-icon">O</div>
-            <span className="header-logo-text">
-              ONSITE <span className="header-logo-accent">LEARN</span>
-            </span>
+            <Image
+              src="/images/logo-sleeve.png"
+              alt="OnSite Club"
+              width={132}
+              height={40}
+              priority
+              style={{ objectFit: 'contain' }}
+            />
           </Link>
 
           <nav className="header-nav">
@@ -56,8 +92,20 @@ export default function Header() {
           </nav>
 
           <div className="header-actions">
-            <Link href="/wallet" className="btn-outline">My Wallet</Link>
-            <button className="btn-dark">Sign In</button>
+            {user ? (
+              <>
+                <Link href="/wallet" className="btn-outline">My Wallet</Link>
+                <div className="header-user">
+                  <div className="header-avatar">{getInitials(user)}</div>
+                  <button className="btn-outline" onClick={handleSignOut} style={{ fontSize: 11 }}>Sign Out</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="btn-outline">Sign In</Link>
+                <Link href="/signup" className="btn-dark">Sign Up</Link>
+              </>
+            )}
           </div>
 
           <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu">
@@ -82,7 +130,23 @@ export default function Header() {
             {MENUS.resources.map((m) => (
               <Link key={m.href} href={m.href} className="mobile-nav-sub" onClick={() => setMobileOpen(false)}>{m.label}</Link>
             ))}
-            <Link href="/wallet" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>My Wallet</Link>
+            {user ? (
+              <>
+                <Link href="/wallet" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>My Wallet</Link>
+                <button
+                  className="mobile-nav-link"
+                  onClick={() => { handleSignOut(); setMobileOpen(false); }}
+                  style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                <Link href="/signup" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+              </>
+            )}
           </div>
         </div>
       </div>

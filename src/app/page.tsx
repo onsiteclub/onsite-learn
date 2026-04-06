@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Marquee from '@/components/Marquee';
 import CourseCard from '@/components/CourseCard';
 import MicroCard from '@/components/MicroCard';
-import { COURSES, PATHWAYS, BLOG, IMG } from '@/lib/data';
+import { COURSES, PATHWAYS, BLOG, IMG, FREE_COURSES } from '@/lib/data';
 
 export default function Home() {
   return (
@@ -28,6 +29,8 @@ export default function Home() {
         </div>
       </section>
 
+      <Marquee />
+
       {/* Mandatory */}
       <section className="section">
         <div className="section-label-learn"><span>Mandatory Certifications</span></div>
@@ -47,7 +50,7 @@ export default function Home() {
 
       {/* Pathways */}
       <section className="section-alt">
-        <div className="section" style={{ padding: '64px 28px' }}>
+        <div className="section">
           <div className="section-label-learn"><span>Career Pathways</span></div>
           <h2 className="section-title">Choose your direction</h2>
           <p className="section-desc" style={{ marginBottom: 32 }}>Structured learning tracks from entry-level to site leadership.</p>
@@ -88,9 +91,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Free External Courses */}
+      <section className="section">
+        <div className="section-label-learn"><span>Free Courses</span></div>
+        <div className="section-header">
+          <div>
+            <h2 className="section-title">Start learning for free</h2>
+            <p className="section-desc">Free certifications and training from trusted providers. All courses open in a new tab.</p>
+          </div>
+        </div>
+        <div className="course-grid course-grid-2">
+          {FREE_COURSES.map((c) => (
+            <a key={c.id} href={c.url} target="_blank" rel="noopener noreferrer" className="free-course-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={c.img} alt={c.title} className="free-course-card-img" />
+              <div className="free-course-card-body">
+                <div className="free-course-card-top">
+                  <span className="tag tag-green">FREE</span>
+                  <span className="free-course-provider">{c.provider}</span>
+                </div>
+                <h3>{c.title}</h3>
+                <p>{c.description}</p>
+                <span className="free-course-link">Start Course &#8599;</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
       {/* Micro */}
       <section className="section-alt">
-        <div className="section" style={{ padding: '64px 28px' }}>
+        <div className="section">
           <div className="section-label-learn"><span>Quick Courses</span></div>
           <h2 className="section-title">Learn in 30 minutes or less</h2>
           <p className="section-desc" style={{ marginBottom: 24 }}>Bite-sized lessons designed for the jobsite.</p>

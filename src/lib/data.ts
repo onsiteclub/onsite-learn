@@ -12,6 +12,10 @@ export const IMG = {
   scaffold: 'https://images.unsplash.com/photo-1590644365607-1c5a6e69f180?w=600&q=80',
   welding: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80',
   confined: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80',
+  supervisor: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',
+  worker: 'https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?w=600&q=80',
+  ramset: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80',
+  chainsaw: 'https://images.unsplash.com/photo-1598902468172-4b71db670584?w=600&q=80',
 };
 
 export interface Course {
@@ -51,6 +55,50 @@ export const COURSES: Record<string, Course[]> = {
     { id: 'framing101', title: 'Framing 101', sub: 'Layout · Headers · Rough Openings', dur: '40 min', img: IMG.framing, progress: 0, modules: ['Wall Layout', 'Headers', 'Rough Openings', 'Plumb & Level', 'Mistakes'], type: 'Online' },
   ],
 };
+
+export interface FreeCourse {
+  id: string;
+  title: string;
+  description: string;
+  provider: string;
+  url: string;
+  img: string;
+}
+
+export const FREE_COURSES: FreeCourse[] = [
+  {
+    id: 'crew-leader',
+    title: 'Crew Leader Training',
+    description: 'Supervisor Health & Safety Awareness in 5 steps. Required training for crew leaders covering their legal duties and how to protect workers on site.',
+    provider: 'Ministry of Labour, Ontario',
+    url: 'https://www.labour.gov.on.ca/english/hs/elearn/supervisor/fivesteps.php',
+    img: IMG.supervisor,
+  },
+  {
+    id: 'employer-training',
+    title: 'Employer Training',
+    description: 'Worker Health & Safety Awareness in 4 steps. Covers worker and employer responsibilities, hazard recognition, and workplace rights under Ontario law.',
+    provider: 'Ministry of Labour, Ontario',
+    url: 'https://www.labour.gov.on.ca/english/hs/elearn/worker/foursteps.php',
+    img: IMG.worker,
+  },
+  {
+    id: 'ramset-pat',
+    title: 'Ramset PAT Certification',
+    description: 'Powder Actuated Tool online certification test. Get your PAT license to safely operate Ramset tools on construction sites.',
+    provider: 'Ramset',
+    url: 'https://www.ramset.com/patlicensing',
+    img: IMG.ramset,
+  },
+  {
+    id: 'chainsaw-safety',
+    title: 'Chainsaw Safety',
+    description: 'Online chainsaw safety certification covering proper handling, maintenance, and PPE requirements. Unlimited exam attempts included.',
+    provider: 'eSafetyFirst',
+    url: 'https://esafetyfirst.com/courses/chainsaw-safety/',
+    img: IMG.chainsaw,
+  },
+];
 
 export const PATHWAYS = [
   { title: 'General Labourer', steps: ['H&S Awareness', 'WHMIS', 'Working at Heights'], duration: '1–2 weeks', color: '#2D8A4E' },
