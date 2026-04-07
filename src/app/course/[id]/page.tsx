@@ -1,18 +1,23 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { COURSES } from '@/lib/data';
+import RedirectModal from '@/components/RedirectModal';
+import { ALL_COURSES } from '@/lib/data';
+import type { BadgeType } from '@/lib/data';
 
-const ALL_COURSES = [...COURSES.mandatory, ...COURSES.skills, ...COURSES.micro];
+const BADGE_STYLES: Record<BadgeType, string> = {
+  REQUIRED: 'badge-required',
+  CERTIFICATION: 'badge-certification',
+  DESIGNATION: 'badge-designation',
+};
 
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const course = ALL_COURSES.find((c) => c.id === id) || ALL_COURSES[0];
-
-  const tagClass = course.tag === 'REQUIRED' ? 'tag-required' : course.tag === 'CERTIFICATION' ? 'tag-cert' : 'tag-skill';
+  const [showRedirect, setShowRedirect] = useState(false);
 
   return (
     <>
@@ -23,7 +28,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         <img src={course.img} alt="" />
         <div className="detail-hero-overlay" />
         <div className="detail-hero-content">
-          {course.tag && <span className={`tag ${tagClass}`}>{course.tag}</span>}
+          <span className={`course-badge ${BADGE_STYLES[course.badge]}`}>{course.badge}</span>
           <h1>{course.title}</h1>
           <p>{course.sub}</p>
         </div>
@@ -43,24 +48,20 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
           <div>
             <div className="detail-sidebar-price">
-              <div className={`detail-price${course.price === 'Free' ? ' free' : ''}`}>
+              <div className={`detail-price${course.price === 'Free' || course.price?.includes('Free') ? ' free' : ''}`}>
                 {course.price || 'Free'}
               </div>
               <div className="detail-sub">{course.sub}</div>
-              {course.link ? (
-                <a href={course.link} target="_blank" rel="noopener noreferrer" className="detail-cta">
-                  Go to Official Course
-                </a>
-              ) : (
-                <button className="detail-cta">Start Course</button>
-              )}
+              <button className="detail-cta" onClick={() => setShowRedirect(true)}>
+                Go to {course.provider}
+              </button>
             </div>
 
             <div className="detail-meta">
               {[
                 { l: 'Duration', v: course.dur || '—' },
                 { l: 'Format', v: course.type || '—' },
-                { l: 'Provider', v: course.provider || 'OnSite Learn' },
+                { l: 'Provider', v: course.provider },
                 ...(course.renewal ? [{ l: 'Renewal', v: `Every ${course.renewal}` }] : []),
               ].map((r, i) => (
                 <div key={i} className="detail-meta-row">
@@ -74,6 +75,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
         <Link href="/" className="back-link">← Back to courses</Link>
       </div>
+
+      {showRedirect && (
+        <RedirectModal
+          isOpen={showRedirect}
+          onClose={() => setShowRedirect(false)}
+          providerName={course.provider}
+          externalUrl={course.link}
+          courseName={course.title}
+        />
+      )}
 
       <Footer />
     </>

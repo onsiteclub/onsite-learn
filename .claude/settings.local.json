@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uipro init:*)",
+      "Bash(export SUPABASE_ACCESS_TOKEN=sbp_7c1d4988688b6453ff6d8cfd3e495d66d3a2cc2c)",
+      "Bash(npx next lint)"
+    ],
+    "additionalDirectories": [
+      "C:\\Dev\\Onsite-club\\onsite-website-3\\public\\images"
+    ]
+  }
+}

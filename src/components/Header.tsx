@@ -6,15 +6,18 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import AuthModal from '@/components/AuthModal';
+import SearchBox from '@/components/SearchBox';
 
 const MENUS: Record<string, { label: string; desc: string; href: string }[]> = {
   programs: [
-    { label: 'Mandatory Certifications', desc: "Ontario's 3 required courses", href: '/courses/mandatory' },
-    { label: 'Trade Skills & Certifications', desc: 'Equipment, welding, scaffolding', href: '/courses/skills' },
-    { label: 'Microlearning Courses', desc: 'Quick lessons — 20 to 45 min', href: '/courses/micro' },
-    { label: 'Career Pathways', desc: 'Guided learning tracks by role', href: '/pathways' },
+    { label: 'Essential Courses', desc: 'Start here — mandatory basics', href: '/#essentials' },
+    { label: 'Government Free & Online', desc: 'Free Ontario government courses', href: '/courses/government' },
+    { label: 'Paid Online from Partners', desc: 'Certified online training', href: '/courses/paid-online' },
+    { label: 'In-Person from Partners', desc: 'Hands-on at training centres', href: '/courses/in-person' },
   ],
   resources: [
+    { label: 'Career Pathways', desc: 'Guided learning tracks by role', href: '/pathways' },
     { label: 'Blog & Industry News', desc: 'Regulation updates, career guides', href: '/blog' },
     { label: 'Find Training Providers', desc: 'CPO-approved centres near you', href: '#' },
     { label: 'Help Centre', desc: 'FAQ and support contact', href: '#' },
@@ -32,6 +35,8 @@ export default function Header() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authRedirect, setAuthRedirect] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const supabase = createClient();
@@ -50,6 +55,15 @@ export default function Header() {
     setUser(null);
     router.refresh();
     router.push('/');
+  }
+
+  function handleWalletClick() {
+    if (user) {
+      router.push('/wallet');
+    } else {
+      setAuthRedirect('/wallet');
+      setAuthModalOpen(true);
+    }
   }
 
   return (
@@ -75,7 +89,7 @@ export default function Header() {
               <div key={id} className="nav-item">
                 <button className="nav-btn">
                   {id.charAt(0).toUpperCase() + id.slice(1)}
-                  <span className="nav-caret">▾</span>
+                  <span className="nav-caret">&#9662;</span>
                 </button>
                 <div className="nav-dropdown">
                   <div className="nav-dropdown-inner">
@@ -91,35 +105,32 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="header-actions">
-            {user ? (
-              <>
-                <Link href="/wallet" className="btn-outline">My Wallet</Link>
+          <div className="header-right">
+            <SearchBox />
+            <div className="header-actions">
+              <button className="btn-outline" onClick={handleWalletClick}>Wallet</button>
+              {user ? (
                 <div className="header-user">
                   <div className="header-avatar">{getInitials(user)}</div>
                   <button className="btn-outline" onClick={handleSignOut} style={{ fontSize: 11 }}>Sign Out</button>
                 </div>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="btn-outline">Sign In</Link>
-                <Link href="/signup" className="btn-dark">Sign Up</Link>
-              </>
-            )}
+              ) : (
+                <button className="btn-dark" onClick={() => setAuthModalOpen(true)}>Member Area</button>
+              )}
+            </div>
+            <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
-
-          <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </header>
 
       {/* Mobile nav */}
       <div className={`mobile-nav${mobileOpen ? ' open' : ''}`} onClick={() => setMobileOpen(false)}>
         <div className="mobile-nav-inner" onClick={(e) => e.stopPropagation()}>
-          <button className="mobile-nav-close" onClick={() => setMobileOpen(false)}>×</button>
+          <button className="mobile-nav-close" onClick={() => setMobileOpen(false)}>&times;</button>
           <div className="mobile-nav-links">
             <Link href="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Home</Link>
             <div className="mobile-nav-link">Programs</div>
@@ -132,7 +143,7 @@ export default function Header() {
             ))}
             {user ? (
               <>
-                <Link href="/wallet" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>My Wallet</Link>
+                <Link href="/wallet" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Wallet</Link>
                 <button
                   className="mobile-nav-link"
                   onClick={() => { handleSignOut(); setMobileOpen(false); }}
@@ -143,13 +154,31 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/login" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Sign In</Link>
-                <Link href="/signup" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+                <button
+                  className="mobile-nav-link"
+                  onClick={() => { setMobileOpen(false); handleWalletClick(); }}
+                  style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Wallet
+                </button>
+                <button
+                  className="mobile-nav-link"
+                  onClick={() => { setMobileOpen(false); setAuthModalOpen(true); }}
+                  style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Member Area
+                </button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => { setAuthModalOpen(false); setAuthRedirect(undefined); }}
+        redirectAfter={authRedirect}
+      />
     </>
   );
 }

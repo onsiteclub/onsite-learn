@@ -3,8 +3,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Marquee from '@/components/Marquee';
 import CourseCard from '@/components/CourseCard';
-import MicroCard from '@/components/MicroCard';
-import { COURSES, PATHWAYS, BLOG, IMG, FREE_COURSES } from '@/lib/data';
+import WalletExplainer from '@/components/WalletExplainer';
+import ProvinceTabs from '@/components/ProvinceTabs';
+import { ESSENTIAL_COURSES, SPECIALIST_COURSES } from '@/lib/data';
 
 export default function Home() {
   return (
@@ -13,16 +14,73 @@ export default function Home() {
 
       {/* Hero */}
       <section className="hero">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="hero-img" src={IMG.hero} alt="" />
+        {/* Parallax blueprint background */}
+        <div className="hero-blueprint" />
         <div className="hero-overlay" />
+
+        {/* Construction line-draw SVG */}
+        <svg className="hero-construction-svg" viewBox="0 0 700 550" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Foundation */}
+          <path d="M 60 480 L 540 480" className="draw-line dl-0" />
+
+          {/* Ground floor columns */}
+          <path d="M 100 480 L 100 350" className="draw-line dl-1" />
+          <path d="M 220 480 L 220 350" className="draw-line dl-2" />
+          <path d="M 340 480 L 340 350" className="draw-line dl-3" />
+          <path d="M 500 480 L 500 350" className="draw-line dl-4" />
+
+          {/* 1st floor beam */}
+          <path d="M 80 350 L 520 350" className="draw-line dl-5" />
+
+          {/* 2nd floor columns */}
+          <path d="M 100 350 L 100 230" className="draw-line dl-6" />
+          <path d="M 220 350 L 220 230" className="draw-line dl-7" />
+          <path d="M 340 350 L 340 230" className="draw-line dl-8" />
+          <path d="M 500 350 L 500 230" className="draw-line dl-9" />
+
+          {/* 2nd floor beam */}
+          <path d="M 80 230 L 520 230" className="draw-line dl-10" />
+
+          {/* Roof columns */}
+          <path d="M 100 230 L 100 120" className="draw-line dl-11" />
+          <path d="M 500 230 L 500 120" className="draw-line dl-12" />
+
+          {/* Roof beam */}
+          <path d="M 80 120 L 520 120" className="draw-line dl-13" />
+
+          {/* Cross braces */}
+          <path d="M 100 480 L 220 350" className="draw-line dl-14" />
+          <path d="M 340 480 L 500 350" className="draw-line dl-15" />
+          <path d="M 100 350 L 220 230" className="draw-line dl-16" />
+          <path d="M 340 350 L 500 230" className="draw-line dl-17" />
+
+          {/* Crane mast */}
+          <path d="M 590 480 L 590 70" className="draw-line dl-18" />
+
+          {/* Crane jib */}
+          <path d="M 590 80 L 180 80" className="draw-line dl-19" />
+
+          {/* Crane counter-jib */}
+          <path d="M 590 80 L 670 80" className="draw-line dl-20" />
+
+          {/* Crane cable */}
+          <path d="M 300 80 L 300 140" className="draw-line dl-21" />
+
+          {/* Crane hook */}
+          <path d="M 292 140 L 308 140" className="draw-line dl-22" />
+
+          {/* Dimension marks */}
+          <path d="M 60 500 L 540 500" className="draw-line dl-23" strokeDasharray="4 8" />
+          <path d="M 560 480 L 560 120" className="draw-line dl-24" strokeDasharray="4 8" />
+        </svg>
+
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="hero-tag">PROFESSIONAL CONSTRUCTION TRAINING</div>
-            <h1>Certifications.<br />Courses.<br />Career ready.</h1>
-            <p>Ontario&rsquo;s mandatory certifications, trade skill training, and your digital credential wallet.</p>
+            <div className="hero-tag">CANADIAN CONSTRUCTION TRAINING</div>
+            <h1>Know What You Need.<br />Get It Done.</h1>
+            <p>Mandatory courses, upgrades, and career certifications — organized so you can start working faster.</p>
             <div className="hero-btns">
-              <Link href="/courses/mandatory" className="btn-amber">Explore Programs</Link>
+              <a href="#mandatory" className="btn-amber">See Mandatory Courses</a>
               <Link href="/wallet" className="btn-ghost">Open Wallet</Link>
             </div>
           </div>
@@ -31,154 +89,36 @@ export default function Home() {
 
       <Marquee />
 
-      {/* Mandatory */}
-      <section className="section">
-        <div className="section-label-learn"><span>Mandatory Certifications</span></div>
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Required by Ontario Law</h2>
-            <p className="section-desc">Every construction worker must complete these before starting on site.</p>
-          </div>
-          <Link href="/courses/mandatory" className="btn-outline">View All</Link>
-        </div>
-        <div className="course-grid course-grid-3">
-          {COURSES.mandatory.map((c) => (
-            <CourseCard key={c.id} course={c} large />
-          ))}
-        </div>
-      </section>
+      {/* Course Catalog */}
+      <div className="catalog" id="mandatory">
+        <div className="catalog-inner">
+          <h2 className="catalog-heading">Mandatory</h2>
+          <ProvinceTabs />
 
-      {/* Pathways */}
-      <section className="section-alt">
-        <div className="section">
-          <div className="section-label-learn"><span>Career Pathways</span></div>
-          <h2 className="section-title">Choose your direction</h2>
-          <p className="section-desc" style={{ marginBottom: 32 }}>Structured learning tracks from entry-level to site leadership.</p>
-          <div className="pathway-grid">
-            {PATHWAYS.map((p, i) => (
-              <Link key={i} href="/pathways" className="pathway-card">
-                <div className="pathway-card-bar" style={{ background: p.color }} />
-                <div className="pathway-card-body">
-                  <h3>{p.title}</h3>
-                  {p.steps.map((s, j) => (
-                    <div key={j} className="pathway-step">
-                      <div className="pathway-step-num">{j + 1}</div>
-                      <span>{s}</span>
-                    </div>
-                  ))}
-                  <div className="pathway-footer">
-                    <span className="pathway-dur">{p.duration}</span>
-                    <span className="pathway-link">View track</span>
-                  </div>
-                </div>
-              </Link>
+          {/* Portability Warning */}
+          <div className="portability-warning">
+            <span className="portability-warning-icon">{'\u26A0'}</span>
+            Alberta&apos;s Fall Protection is NOT equivalent to Ontario&apos;s Working at Heights. If you move provinces, you must recertify.
+          </div>
+
+          <h2 className="catalog-heading" id="essential">Essential for the Job Site</h2>
+          <div className="course-grid course-grid-3">
+            {ESSENTIAL_COURSES.map((c) => (
+              <CourseCard key={c.id} course={c} />
+            ))}
+          </div>
+
+          <h2 className="catalog-heading" id="career">Career &amp; Specialist</h2>
+          <div className="course-grid course-grid-3">
+            {SPECIALIST_COURSES.map((c) => (
+              <CourseCard key={c.id} course={c} />
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Skills */}
-      <section className="section">
-        <div className="section-label-learn"><span>Trade Skills</span></div>
-        <div className="section-header">
-          <h2 className="section-title">Advance your career</h2>
-          <Link href="/courses/skills" className="btn-outline">View All</Link>
-        </div>
-        <div className="course-grid course-grid-3">
-          {COURSES.skills.slice(0, 6).map((c) => (
-            <CourseCard key={c.id} course={c} />
-          ))}
-        </div>
-      </section>
-
-      {/* Free External Courses */}
-      <section className="section">
-        <div className="section-label-learn"><span>Free Courses</span></div>
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Start learning for free</h2>
-            <p className="section-desc">Free certifications and training from trusted providers. All courses open in a new tab.</p>
-          </div>
-        </div>
-        <div className="course-grid course-grid-2">
-          {FREE_COURSES.map((c) => (
-            <a key={c.id} href={c.url} target="_blank" rel="noopener noreferrer" className="free-course-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={c.img} alt={c.title} className="free-course-card-img" />
-              <div className="free-course-card-body">
-                <div className="free-course-card-top">
-                  <span className="tag tag-green">FREE</span>
-                  <span className="free-course-provider">{c.provider}</span>
-                </div>
-                <h3>{c.title}</h3>
-                <p>{c.description}</p>
-                <span className="free-course-link">Start Course &#8599;</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* Micro */}
-      <section className="section-alt">
-        <div className="section">
-          <div className="section-label-learn"><span>Quick Courses</span></div>
-          <h2 className="section-title">Learn in 30 minutes or less</h2>
-          <p className="section-desc" style={{ marginBottom: 24 }}>Bite-sized lessons designed for the jobsite.</p>
-          <div className="course-grid course-grid-2">
-            {COURSES.micro.map((c) => (
-              <MicroCard key={c.id} course={c} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Blog */}
-      <section className="section">
-        <div className="section-label-learn"><span>Industry News</span></div>
-        <div className="section-header">
-          <h2 className="section-title">From the blog</h2>
-          <Link href="/blog" className="btn-outline">All Articles</Link>
-        </div>
-        <div className="course-grid course-grid-3">
-          {BLOG.map((p, i) => (
-            <Link key={i} href="/blog" className="blog-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.img} alt="" />
-              <div className="blog-card-body">
-                <div className="blog-card-meta">
-                  <span className="blog-card-cat">{p.cat}</span>
-                  <span className="blog-card-date">{p.date}</span>
-                </div>
-                <h3>{p.title}</h3>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-banner">
-        <div className="cta-banner-inner">
-          <div className="cta-banner-content">
-            <h2>Your credentials. One place. Always ready.</h2>
-            <p>Store certifications, track expirations, and share with employers via QR code.</p>
-            <Link href="/wallet" className="btn-amber">Open Your Wallet — Free</Link>
-          </div>
-          <div className="cta-stats">
-            {[
-              { n: '500+', l: 'Workers' },
-              { n: '12', l: 'Courses' },
-              { n: 'Free', l: 'To Start' },
-            ].map((s) => (
-              <div key={s.l}>
-                <div className="cta-stat-num">{s.n}</div>
-                <div className="cta-stat-label">{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Wallet Explainer */}
+      <WalletExplainer />
 
       <Footer />
     </>
