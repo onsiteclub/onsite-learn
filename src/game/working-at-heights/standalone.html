@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Working at Heights — Safety Training Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      background: #1C1F23;
+      overflow: hidden;
+      font-family: monospace;
+    }
+    #game-container {
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!--
+    BUILD OUTPUT:
+    When bundled with esbuild, the entire game JS will be inlined here.
+    For development, import modules individually via script type="module".
+
+    Build command:
+    npx esbuild src/game/working-at-heights/standalone-entry.ts \
+      - -bundle - -outfile=public/games/working-at-heights/game.js \
+      - -format=iife - -minify
+
+    Then reference: <script src="game.js"></script>
+  -->
+  <script type="module">
+    // Development: dynamic import from source
+    // Production: this gets replaced by bundled output
+    import { Game } from './index.ts';
+
+    const canvas = document.getElementById('game-canvas');
+    const container = document.getElementById('game-container');
+    const game = new Game(canvas);
+    game.resize(container);
+    game.start();
+
+    window.addEventListener('resize', () => game.resize(container));
+  </script>
+</body>
+</html>

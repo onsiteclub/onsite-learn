@@ -261,6 +261,33 @@ export const PATHWAYS = [
   { title: 'Site Supervisor', steps: ['All Certifications', 'JHSC Part 1 & 2', 'Supervisor H&S', 'Leadership'], duration: '3\u20136 months', color: '#C53030' },
 ];
 
+export const GAMES = [
+  {
+    id: 'ppe-quiz',
+    title: 'PPE Match',
+    description: 'Match the right personal protective equipment to each job site scenario.',
+    thumbnail: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',
+    category: 'Safety',
+    gamePath: '/games/ppe-quiz/index.html',
+  },
+  {
+    id: 'hazard-spotter',
+    title: 'Hazard Spotter',
+    description: 'Find all safety hazards on the construction site before time runs out.',
+    thumbnail: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=80',
+    category: 'Awareness',
+    gamePath: '/games/hazard-spotter/index.html',
+  },
+  {
+    id: 'signal-trainer',
+    title: 'Crane Signals',
+    description: 'Learn and practice standard hand signals for crane operations.',
+    thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&q=80',
+    category: 'Operations',
+    gamePath: '/games/signal-trainer/index.html',
+  },
+];
+
 export const BLOG = [
   { title: 'Ontario Updates Working at Heights Standards for 2026', date: 'Mar 28, 2026', cat: 'Regulation', img: IMG.wah },
   { title: '5 Certifications That Boost Your Hourly Rate', date: 'Mar 15, 2026', cat: 'Career', img: IMG.crane },

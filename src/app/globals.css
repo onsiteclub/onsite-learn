@@ -959,6 +959,57 @@ body {
   border: 1px solid var(--border);
 }
 
+/* ===== GAME CONTAINER ===== */
+.game-container {
+  background: var(--card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); overflow: hidden;
+}
+
+.game-container-toolbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; background: var(--charcoal);
+}
+.game-container-title {
+  font-family: var(--font-display); font-size: 14px;
+  font-weight: 700; color: var(--white); letter-spacing: .03em;
+}
+.game-container-badge {
+  font-family: var(--font-display); font-size: 9px;
+  font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--charcoal); background: var(--amber);
+  padding: 2px 8px; border-radius: var(--radius-full);
+}
+
+.game-stage {
+  width: 100%; min-height: 500px;
+  background: var(--charcoal-mid);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Iframe that fills the stage (use this class when loading a game) */
+.game-stage-iframe {
+  width: 100%; height: 500px; border: none; display: block;
+}
+
+/* Placeholder shown before a game is loaded */
+.game-stage-placeholder {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; padding: 40px; text-align: center;
+}
+.game-stage-placeholder-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--charcoal-light);
+  display: flex; align-items: center; justify-content: center;
+  color: #5A6069;
+}
+.game-stage-placeholder p {
+  font-family: var(--font-display); font-size: 16px;
+  font-weight: 700; color: #6B7380;
+}
+.game-stage-placeholder span {
+  font-size: 13px; color: #5A6069;
+}
+
 /* ===== FOOTER ===== */
 .site-footer { background: var(--charcoal); margin-top: 0; }
 .footer-inner { max-width: var(--max-w); margin: 0 auto; padding: 64px 24px 28px; }
@@ -1322,6 +1373,8 @@ body {
 
   .course-grid-3 { grid-template-columns: 1fr; }
   .course-grid-2 { grid-template-columns: 1fr; }
+  .game-stage { min-height: 350px; }
+  .game-stage-iframe { height: 350px; }
   .province-tab { padding: 10px 16px; font-size: 12px; }
   .catalog-inner { padding: 40px 16px 56px; }
   .catalog-heading { font-size: 20px; }

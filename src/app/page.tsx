@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Marquee from '@/components/Marquee';
@@ -6,6 +7,11 @@ import CourseCard from '@/components/CourseCard';
 import WalletExplainer from '@/components/WalletExplainer';
 import ProvinceTabs from '@/components/ProvinceTabs';
 import { ESSENTIAL_COURSES, SPECIALIST_COURSES } from '@/lib/data';
+
+const WorkingAtHeightsGame = dynamic(
+  () => import('@/game/working-at-heights/WorkingAtHeightsGame'),
+  { ssr: false },
+);
 
 export default function Home() {
   return (
@@ -116,6 +122,36 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Educational Games */}
+      <section className="section-alt" id="games">
+        <div className="section">
+          <div className="section-label-learn"><span>Learn by Playing</span></div>
+          <h2 className="section-title">Educational Games</h2>
+          <p className="section-desc" style={{ marginBottom: 32 }}>Test your safety knowledge with interactive games built for construction workers.</p>
+
+          {/*
+            GAME CONTAINER
+            ===============
+            Single full-width card that hosts the game inline.
+            - The game should be rendered INSIDE the <div className="game-stage"> below.
+            - On desktop: the game plays horizontally inside this card (landscape, ~500px height).
+            - On mobile: clicking "Play" triggers fullscreen + landscape orientation lock (see GameCard.tsx for reference).
+            - The game source (HTML/Canvas/JS) goes in: public/games/<game-name>/index.html
+            - Load the game via <iframe src="/games/<game-name>/index.html" /> or render directly with React/Canvas.
+            - The toolbar at the top shows the game title and a close/minimize button.
+          */}
+          <div className="game-container">
+            <div className="game-container-toolbar">
+              <span className="game-container-title">Help &quot;Guy&quot; in His First Day</span>
+              <span className="game-container-badge">BETA</span>
+            </div>
+            <div className="game-stage">
+              <WorkingAtHeightsGame />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Wallet Explainer */}
       <WalletExplainer />
