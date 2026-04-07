@@ -20,7 +20,7 @@ export class TitleScreen {
     return this.visible;
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, isMobile = false): void {
     if (!this.visible) return;
 
     ctx.save();
@@ -61,18 +61,42 @@ export class TitleScreen {
     ctx.fillText('Help the rookie navigate safety procedures', cx, 400);
     ctx.fillText('on his first day at a construction site.', cx, 420);
 
-    // Controls summary
-    ctx.fillStyle = COLORS.dialogueText;
-    ctx.font = '11px monospace';
-    ctx.fillText('WASD / Arrows — Move    |    SPACE — Jump', cx, 470);
-    ctx.fillText('E — Interact    |    Q — Equip    |    C — Talk', cx, 490);
+    if (!isMobile) {
+      // Desktop controls summary
+      ctx.fillStyle = COLORS.dialogueText;
+      ctx.font = '11px monospace';
+      ctx.fillText('WASD / Arrows — Move    |    SPACE — Jump', cx, 470);
+      ctx.fillText('E — Interact    |    Q — Equip    |    C — Talk', cx, 490);
 
-    // Start prompt
-    ctx.fillStyle = COLORS.safetyYellow;
-    ctx.font = 'bold 18px monospace';
-    const blink = Math.floor(Date.now() / 600) % 2 === 0;
-    if (blink) {
-      ctx.fillText('Press SPACE to start', cx, 560);
+      // Desktop start prompt (blinking text)
+      ctx.fillStyle = COLORS.safetyYellow;
+      ctx.font = 'bold 18px monospace';
+      const blink = Math.floor(Date.now() / 600) % 2 === 0;
+      if (blink) {
+        ctx.fillText('Press SPACE to start', cx, 560);
+      }
+    } else {
+      // Mobile — draw PLAY button
+      const btnW = 200;
+      const btnH = 64;
+      const btnX = cx - btnW / 2;
+      const btnY = 490;
+
+      // Button background
+      ctx.fillStyle = COLORS.safetyYellow;
+      ctx.beginPath();
+      ctx.roundRect(btnX, btnY, btnW, btnH, 14);
+      ctx.fill();
+
+      // Button text
+      ctx.fillStyle = COLORS.dialogueBg;
+      ctx.font = 'bold 28px monospace';
+      ctx.fillText('▶  PLAY', cx, btnY + btnH / 2 + 10);
+
+      // Hint below
+      ctx.fillStyle = COLORS.steelLight;
+      ctx.font = '12px monospace';
+      ctx.fillText('Tap anywhere to start', cx, btnY + btnH + 30);
     }
 
     // Safety stripes (bottom)

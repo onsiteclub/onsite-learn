@@ -1,6 +1,6 @@
 /* =============================================
    Working at Heights — Input Manager
-   Keyboard handler for WASD/Arrows + E/Q/C/SPACE
+   Keyboard + touch input handler
    ============================================= */
 
 import type { InputState } from '../types';
@@ -9,15 +9,16 @@ export class InputManager {
   private keys: Set<string> = new Set();
   private justPressed: Set<string> = new Set();
   private previousKeys: Set<string> = new Set();
+  private target: HTMLElement | Window;
 
   constructor(target: HTMLElement | Window = window) {
+    this.target = target;
     target.addEventListener('keydown', this.onKeyDown);
     target.addEventListener('keyup', this.onKeyUp);
   }
 
   private onKeyDown = (e: Event): void => {
     const key = (e as KeyboardEvent).key.toLowerCase();
-    // Prevent default for game keys
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'e', 'q', 'c'].includes(key)) {
       e.preventDefault();
     }
@@ -31,6 +32,20 @@ export class InputManager {
     const key = (e as KeyboardEvent).key.toLowerCase();
     this.keys.delete(key);
   };
+
+  /** Simulate a key press (used by touch controls) */
+  simulateKeyDown(key: string): void {
+    const k = key.toLowerCase();
+    if (!this.keys.has(k)) {
+      this.justPressed.add(k);
+    }
+    this.keys.add(k);
+  }
+
+  /** Simulate a key release (used by touch controls) */
+  simulateKeyUp(key: string): void {
+    this.keys.delete(key.toLowerCase());
+  }
 
   /** Call once per frame after processing input */
   update(): void {
@@ -58,28 +73,24 @@ export class InputManager {
     return this.justPressed.has(key.toLowerCase());
   }
 
-  /** Check if interact (E) was just pressed */
   justInteract(): boolean {
     return this.wasJustPressed('e');
   }
 
-  /** Check if equip (Q) was just pressed */
   justEquip(): boolean {
     return this.wasJustPressed('q');
   }
 
-  /** Check if talk (C) was just pressed */
   justTalk(): boolean {
     return this.wasJustPressed('c');
   }
 
-  /** Check if advance (SPACE) was just pressed */
   justAdvance(): boolean {
     return this.wasJustPressed(' ');
   }
 
-  destroy(target: HTMLElement | Window = window): void {
-    target.removeEventListener('keydown', this.onKeyDown);
-    target.removeEventListener('keyup', this.onKeyUp);
+  destroy(): void {
+    this.target.removeEventListener('keydown', this.onKeyDown);
+    this.target.removeEventListener('keyup', this.onKeyUp);
   }
 }

@@ -8,6 +8,7 @@ import { InputManager } from './engine/InputManager';
 import { StateMachine } from './engine/StateMachine';
 import { Camera } from './engine/Camera';
 import { CollisionManager } from './engine/CollisionManager';
+import { TouchControls } from './engine/TouchControls';
 
 import { Renderer } from './rendering/Renderer';
 import { Background } from './rendering/Background';
@@ -60,6 +61,7 @@ export class Game {
   private renderer: Renderer;
   private gameLoop: GameLoop;
   private input: InputManager;
+  private touchControls: TouchControls;
   private stateMachine: StateMachine;
   private camera: Camera;
 
@@ -107,6 +109,7 @@ export class Game {
     // --- Core setup ---
     this.renderer = new Renderer(canvas);
     this.input = new InputManager(window);
+    this.touchControls = new TouchControls(canvas, this.input);
     this.stateMachine = new StateMachine('title');
     this.camera = new Camera(CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -134,6 +137,10 @@ export class Game {
       this.ladder8ft, this.ladder10ft, this.ladder13ft,
       this.harness, this.guardrail, this.lifeline,
     ];
+
+    // Lifeline and guardrail are NOT standard pickups — handled via special interactions
+    this.lifeline.interactable = false;
+    this.guardrail.interactable = false;
 
     // --- Systems ---
     this.inventory = new InventorySystem(this.player);
@@ -177,6 +184,7 @@ export class Game {
   stop(): void {
     this.gameLoop.stop();
     this.input.destroy();
+    this.touchControls.destroy();
   }
 
   /** Resize to fit container */
@@ -363,6 +371,9 @@ export class Game {
       this.stateMachine.transition('dialogue');
     }
 
+    // Sync challenge completions with ChallengeManager
+    this.syncChallengeCompletions();
+
     // Check if all challenges done
     if (this.challengeManager.allCompleted()) {
       this.stateMachine.transition('result');
@@ -425,6 +436,11 @@ export class Game {
       // Drop any other item
       this.dropItem();
       return;
+    }
+
+    // ---- C to talk (even while carrying) ----
+    if (this.input.justTalk()) {
+      this.handleTalk();
     }
 
     // ---- E to pick up different object (swap) ----
@@ -588,7 +604,36 @@ export class Game {
 
   private handleInteract(): void {
     const playerBounds = this.player.getBounds();
+    const challengeCtx = {
+      player: this.player,
+      dialogue: this.dialogue,
+      score: this.score,
+      input: this.input,
+    };
 
+    // ---- Special: Lifeline connection (before pickup loop) ----
+    if (
+      this.player.harnessEquipped &&
+      !this.player.lifelineConnected &&
+      CollisionManager.isInRange(playerBounds, this.lifeline.getBounds(), INTERACT_RANGE)
+    ) {
+      this.lifelineChallenge.onLifelineConnected(challengeCtx);
+      this.stateMachine.transition('dialogue');
+      return;
+    }
+
+    // ---- Special: Guardrail installation ----
+    if (
+      !this.guardrail.placed &&
+      !this.guardrail.isPlacing &&
+      CollisionManager.isInRange(playerBounds, this.guardrail.getBounds(), INTERACT_RANGE)
+    ) {
+      this.guardrail.isPlacing = true;
+      this.stateMachine.transition('placing');
+      return;
+    }
+
+    // ---- Standard pickup loop ----
     for (const obj of this.allObjects) {
       if (!obj.interactable || obj.pickedUp) continue;
       if (!CollisionManager.isInRange(playerBounds, obj.getBounds(), INTERACT_RANGE)) continue;
@@ -597,21 +642,6 @@ export class Game {
         this.stateMachine.transition('carrying');
         return;
       }
-    }
-
-    // Check lifeline connection
-    if (
-      this.player.harnessEquipped &&
-      !this.player.lifelineConnected &&
-      CollisionManager.isInRange(playerBounds, this.lifeline.getBounds(), INTERACT_RANGE)
-    ) {
-      this.lifelineChallenge.onLifelineConnected({
-        player: this.player,
-        dialogue: this.dialogue,
-        score: this.score,
-        input: this.input,
-      });
-      this.stateMachine.transition('dialogue');
     }
   }
 
@@ -642,6 +672,22 @@ export class Game {
     }
   }
 
+  /** Sync individual challenge completion flags with the ChallengeManager */
+  private syncChallengeCompletions(): void {
+    const pairs: Array<{ challenge: { isCompleted(): boolean }, id: 'harness' | 'guardrail' | 'lifeline' | 'carlos' }> = [
+      { challenge: this.harnessChallenge, id: 'harness' },
+      { challenge: this.guardrailChallenge, id: 'guardrail' },
+      { challenge: this.lifelineChallenge, id: 'lifeline' },
+      { challenge: this.carlosChallenge, id: 'carlos' },
+    ];
+
+    for (const { challenge, id } of pairs) {
+      if (challenge.isCompleted() && this.challengeManager.get(id)?.status !== 'passed') {
+        this.challengeManager.pass(id);
+      }
+    }
+  }
+
   // ---- Draw ----
 
   private draw(ctx: CanvasRenderingContext2D): void {
@@ -649,7 +695,7 @@ export class Game {
 
     // Title screen
     if (this.stateMachine.isIn('title')) {
-      this.titleScreen.draw(ctx);
+      this.titleScreen.draw(ctx, this.touchControls.isTouchDevice);
       return;
     }
 
@@ -692,6 +738,9 @@ export class Game {
       }
     }
 
+    // ---- Context-sensitive prompts (in world space) ----
+    this.drawContextPrompts(ctx);
+
     // Restore camera transform
     this.camera.restore(ctx);
 
@@ -703,6 +752,9 @@ export class Game {
       this.player.lifelineConnected,
       this.challengeManager,
     );
+
+    // Touch controls (mobile only, above HUD but below dialogue)
+    this.touchControls.draw(ctx);
 
     // Dialogue (always on top)
     this.dialogue.draw(ctx);
@@ -742,6 +794,58 @@ export class Game {
     ctx.restore();
   }
 
+  /** Draw context-sensitive prompts for Carlos, lifeline, guardrail */
+  private drawContextPrompts(ctx: CanvasRenderingContext2D): void {
+    const playerBounds = this.player.getBounds();
+
+    // [C] Talk near Carlos (only if not already warned)
+    if (
+      !this.carlos.wasWarned &&
+      CollisionManager.isInRange(playerBounds, this.carlos.getBounds(), INTERACT_RANGE)
+    ) {
+      const cx = this.carlos.position.x + this.carlos.size.x / 2;
+      const cy = this.carlos.position.y - 24;
+      this.drawPromptBubble(ctx, cx, cy, '[C] Talk');
+    }
+
+    // [E] Connect near lifeline (only if harness equipped and not connected)
+    if (
+      this.player.harnessEquipped &&
+      !this.player.lifelineConnected &&
+      CollisionManager.isInRange(playerBounds, this.lifeline.getBounds(), INTERACT_RANGE)
+    ) {
+      const cx = this.lifeline.position.x + this.lifeline.size.x / 2;
+      const cy = this.lifeline.position.y - 20;
+      this.drawPromptBubble(ctx, cx, cy, '[E] Connect');
+    }
+
+    // [E] Install near guardrail (only if not placed and not placing)
+    if (
+      !this.guardrail.placed &&
+      !this.guardrail.isPlacing &&
+      CollisionManager.isInRange(playerBounds, this.guardrail.getBounds(), INTERACT_RANGE)
+    ) {
+      const cx = this.guardrail.position.x + this.guardrail.size.x / 2;
+      const cy = this.guardrail.position.y - 20;
+      this.drawPromptBubble(ctx, cx, cy, '[E] Install');
+    }
+  }
+
+  private drawPromptBubble(ctx: CanvasRenderingContext2D, cx: number, cy: number, text: string): void {
+    const w = text.length * 7 + 16;
+    ctx.save();
+    ctx.fillStyle = COLORS.hudBg;
+    ctx.beginPath();
+    ctx.roundRect(cx - w / 2, cy - 10, w, 20, 4);
+    ctx.fill();
+
+    ctx.fillStyle = COLORS.safetyYellow;
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, cx, cy + 4);
+    ctx.restore();
+  }
+
   // ---- Reset ----
 
   private resetGame(): void {
@@ -764,6 +868,36 @@ export class Game {
     this.harness.pickedUp = false;
     this.harness.visible = true;
     this.harness.interactable = true;
+
+    // Reset guardrail
+    this.guardrail.placed = false;
+    this.guardrail.isPlacing = false;
+    this.guardrail.installedHeight = null;
+    this.guardrail.isCorrect = false;
+    this.guardrail.interactable = false;
+    this.guardrail.visible = true;
+    this.guardrail.pickedUp = false;
+
+    // Reset lifeline
+    this.lifeline.isConnected = false;
+    this.lifeline.interactable = false;
+    this.lifeline.visible = true;
+    this.lifeline.pickedUp = false;
+
+    // Reset Carlos
+    this.carlos.wasWarned = false;
+    this.carlos.isConnected = false;
+
+    // Reset challenge instances
+    this.harnessChallenge = new HarnessChallenge();
+    this.guardrailChallenge = new GuardrailChallenge();
+    this.guardrailChallenge.setGuardrail(this.guardrail);
+    this.lifelineChallenge = new LifelineChallenge();
+    this.lifelineChallenge.setLifeline(this.lifeline);
+    this.carlosChallenge = new CarlosChallenge();
+    this.carlosChallenge.setCarlos(this.carlos);
+    this.ladderChallenge = new LadderChallenge();
+    this.ladderChallenge.setLadders([this.ladder8ft, this.ladder10ft, this.ladder13ft]);
 
     this.stateMachine.transition('title');
   }
